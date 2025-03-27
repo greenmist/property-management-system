@@ -1,0 +1,43 @@
+<!-- public/admin-dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome, Admin!</h1>
+        <nav>
+            <a href="/manage-users">Manage Users</a> |
+            <a href="/view-reports">View Reports</a> |
+            <!-- The logout link will trigger the client-side JS to handle JWT removal -->
+            <a href="#" id="logoutLink">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Admin Dashboard</h2>
+        <p>As an admin, you can manage users, view property reports, and more.</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Property Management System</p>
+    </footer>
+
+    <script>
+        // Add event listener for logout
+        document.getElementById('logoutLink').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Remove JWT token from localStorage (or sessionStorage if you prefer)
+            localStorage.removeItem('token'); // Use sessionStorage if you store the token in sessionStorage
+
+            // Redirect to the login page after logout
+            window.location.href = '/login.html'; // Redirect to login page or wherever you want
+        });
+    </script>
+</body>
+</html>

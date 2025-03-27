@@ -38,13 +38,32 @@
             .then(response => response.json())
             .then(data => {
                 if (data.token) {
-                    alert("Login successful!");
-                    // Redirect to dashboard or another page
+                    // Save the token in localStorage (or sessionStorage)
+                    localStorage.setItem("token", data.token);
+                    
+                    // Redirect user based on their role
+                    switch(data.user.role) {
+                        case 'admin':
+                            window.location.href = '/adminDashboard.html';
+                            break;
+                        case 'tenant':
+                            window.location.href = '/tenantDashboard.html';
+                            break;
+                        case 'landlord':
+                            window.location.href = '/landlordDashboard.html';
+                            break;
+                        default:
+                            alert('Unknown role');
+                            break;
+                    }
                 } else {
                     alert("Invalid credentials");
                 }
             })
-            .catch(error => alert("Error logging in"));
+            .catch(error => {
+                alert("Error logging in");
+                console.error(error);
+            });
         });
     </script>
 </body>

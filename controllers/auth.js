@@ -32,10 +32,26 @@ exports.login = async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+        // Send the token and user details in the response
+        res.json({
+            token,
+            user: { id: user.id, name: user.name, email: user.email, role: user.role }
+        });
+
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Error logging in' });
     }
+};
+
+// Logout function
+exports.logout = (req, res) => {
+    res.redirect('/login.html'); // Or to another page (like homepage)
 };
