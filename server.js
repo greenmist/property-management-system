@@ -27,20 +27,17 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const session = require('express-session');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());  // Middleware to parse JSON requests
+app.use(express.json());  
 
 // Serve static files (CSS, JS, Images) from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Import routes from 'routes/routes.js'
 const routes = require('./routes/routes');
 
-// Use the routes for handling registration, login, and dashboards
 app.use('/', routes);
 
 // Serve the login page when accessing the root URL

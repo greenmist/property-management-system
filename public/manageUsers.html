@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Users</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Manage Users</h1>
+
+  <!-- View Users Button -->
+  <button id="viewUsers">View Users</button>
+
+  <!-- Add User Form -->
+  <h2>Add User</h2>
+  <form id="addUserForm">
+    <input type="text" id="name" placeholder="Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Add User</button>
+  </form>
+
+  <!-- User List Table -->
+  <h2>User List</h2>
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="users"></tbody>
+  </table>
+
+  <script>
+    document.getElementById("viewUsers").addEventListener("click", function (e) {
+      e.preventDefault();
+      loadUsers();
+    });
+
+    function loadUsers() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found. Please log in.");
+        window.location.href = "/login.html";
+        return;
+      }
+
+      const userList = document.getElementById("users");
+
+      fetch("http://localhost:5000/manage-users/view-users", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((users) => {
+            if (users.length === 0) {
+                userList.innerHTML = "<tr><td colspan='4'>No users available.</td></tr>";
+            } else {
+                userList.innerHTML = users.map(user => `
+                <tr data-id="${user.id}">
+                    <td><input type="text" value="${user.name}" /></td>
+                    <td><input type="email" value="${user.email}" /></td>
+                    <td>
+                    <button>Update</button>
+                    <button>Delete</button>
+                    </td>
+                </tr>
+                `).join("");
+                attachUserActions();
+            }
+            })
+        .catch((error) => {
+          console.error("Error loading users:", error);
+          userList.innerHTML = "<tr><td colspan='4'>Error loading users.</td></tr>";
+        });
+    }
+
+    document.getElementById("addUserForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found. Please log in.");
+        window.location.href = "/login.html";
+        return;
+      }
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      fetch("http://localhost:5000/manage-users/add-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, email, password }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to add user");
+          }
+          return res.json();
+        })
+        .then(() => {
+          document.getElementById("addUserForm").reset();
+          loadUsers(); // Reload the list
+        })
+        .catch((error) => {
+          console.error("Error adding user:", error);
+        });
+    });
+
+    function attachUserActions() {
+        document.querySelectorAll("#users tr").forEach((row, index) => {
+        const updateBtn = row.querySelector("button:nth-child(1)");
+        const deleteBtn = row.querySelector("button:nth-child(2)");
+
+        const id = row.dataset.id; // from data-id
+
+        updateBtn.addEventListener("click", () => {
+            const name = row.querySelector("input[type='text']").value;
+            const email = row.querySelector("input[type='email']").value;
+            updateUser(id, name, email);
+        });
+
+        deleteBtn.addEventListener("click", () => {
+            if (confirm("Are you sure you want to delete this user?")) {
+            deleteUser(id);
+            }
+        });
+        });
+    }
+
+  function updateUser(id, name, email) {
+        const token = localStorage.getItem("token");
+        fetch(`http://localhost:5000/manage-users/edit-user/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, email }),
+        })
+        .then(res => res.json())
+        .then(() => loadUsers())
+        .catch(err => console.error("Error updating user:", err));
+    }
+
+  function deleteUser(id) {
+        const token = localStorage.getItem("token");
+        fetch(`http://localhost:5000/manage-users/delete-user/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+        },
+        })
+        .then(() => loadUsers())
+        .catch(err => console.error("Error deleting user:", err));
+    }
+</script>
+</body>
+</html>

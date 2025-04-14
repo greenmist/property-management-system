@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Properties</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Manage Properties</h1>
+
+    <div id="propertyList">
+        <h2>Property List</h2>
+        <h4><a href="#" id="viewProperties">View All Properties</a></h4>
+        <ul id="properties"></ul>
+    </div>
+
+    <h2>Add Property</h2>
+    <form id="addPropertyForm">
+        <input type="text" id="OwnerID" placeholder="OwnerID" required>
+        <input type="text" id="Address" placeholder="Address" required>
+        <select id="Type" required>
+            <option value="Apartment">Apartment</option>
+            <option value="House">House</option>
+            <option value="Studio">Studio</option>
+            <option value="Office">Office</option>
+        </select>
+        <input type="number" id="RentAmount" placeholder="Rent Amount" required>
+        <select id="Status" required>
+            <option value="Available">Available</option>
+            <option value="Rented">Rented</option>
+        </select>
+        <input type="text" id="Description" placeholder="Description">
+        <button type="submit">Add Property</button>
+    </form>
+
+    <h2>Update Property</h2>
+    <form id="updatePropertyForm">
+        <input type="text" id="updateId" placeholder="Property ID" required>
+        <!-- <input type="text" id="updateName" placeholder="New Name"> -->
+        <input type="text" id="updateAddress" placeholder="New Address">
+        <!-- <input type="number" id="updatePrice" placeholder="New Price"> -->
+        <input type="number" id="updateRentAmount" placeholder="Rent Amount">
+        <select id="updateStatus" required>
+            <option value="Available">Available</option>
+            <option value="Rented">Rented</option>
+        </select>        <button type="submit">Update Property</button>
+    </form>
+
+    <h2>Delete Property</h2>
+    <form id="deletePropertyForm">
+        <input type="text" id="deleteId" placeholder="Property ID" required>
+        <button type="submit">Delete Property</button>
+    </form>
+
+    <script>
+        document.getElementById("viewProperties").addEventListener("click", function(e) {
+            e.preventDefault();
+            loadProperties();
+        });
+
+        function loadProperties() {
+            const token = localStorage.getItem("token"); // Retrieve the token from localStorage
+            if (!token) {
+                console.error("No token found. Please log in.");
+                window.location.href = "/login.html"; // Redirect to login page if no token
+                return;
+            }
+            const propertyList = document.getElementById("properties");
+            // propertyList.innerHTML = "<p>Loading properties...</p>";
+            fetch("http://localhost:5000/manage-properties/view-all-property", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },                
+            }).then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(properties => {
+                    if (properties.length === 0) {
+                        propertyList.innerHTML = "<p>No properties available.</p>";
+                    } else {
+                        propertyList.innerHTML = properties.map(prop => 
+                           `<li>
+                                ${prop.id} - ${prop.OwnerID} - ${prop.Address} - ${prop.Type} - €${prop.RentAmount} - ${prop.Status}
+                                <br><small>${prop.Description || "No description"}</small>
+                            </li>`
+                        ).join("");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error loading properties:", error);
+                    propertyList.innerHTML = "<p>Error loading properties.</p>";
+                });
+        }
+
+        document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const token = localStorage.getItem("token"); // Retrieve the token from localStorage
+            if (!token) {
+                console.error("No token found. Please log in.");
+                window.location.href = "/login.html"; // Redirect to login page if no token
+                return;
+            }
+            const OwnerID = document.getElementById("OwnerID").value;
+            const Address = document.getElementById("Address").value;
+            const Type = document.getElementById("Type").value;
+            const RentAmount = document.getElementById("RentAmount").value;
+            const Status = document.getElementById("Status").value;
+            const Description = document.getElementById("Description").value;
+            
+            fetch("http://localhost:5000/manage-properties/add-admin-property", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },                
+                body: JSON.stringify({ OwnerID, Address, Type, RentAmount, Status, Description })
+            }).then(() => loadProperties());
+        });
+
+        document.getElementById("updatePropertyForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const id = document.getElementById("updateId").value;
+            // const name = document.getElementById("updateName").value;
+            const location = document.getElementById("updateAddress").value;
+            const price = document.getElementById("updateRentAmount").value;
+            const status = document.getElementById("updateStatus").value;
+            
+            fetch(`http://localhost:5000/manage-properties/update-property/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ location, price, status })
+            }).then(() => loadProperties());
+        });
+
+        document.getElementById("deletePropertyForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const id = document.getElementById("deleteId").value;
+            
+            fetch(`http://localhost:5000/manage-properties/delete-property/${id}`, {
+                method: "DELETE" 
+            }).then(() => loadProperties());
+        });
+    </script>
+</body>
+</html>

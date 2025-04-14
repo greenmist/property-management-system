@@ -4,8 +4,21 @@ const db = require('../config/db');
 
 exports.register = async (req, res) => {
     const { name, email, password, role } = req.body;
+	const errors = {};
 
     try {
+        if (!String(name).trim()) {
+            errors.name = ['Name is required'];
+        }
+        
+        if (!(/^[\-0-9a-zA-Z\.\+_]+@[\-0-9a-zA-Z\.\+_]+\.[a-zA-Z]{2,}$/).test(String(email))) {
+            errors.email = ['Email is not valid.'];
+        }
+
+        if (Object.keys(errors).length) {
+            res.status(400).json({ error: 'errors' });
+        }
+    
         const hashedPassword = await bcrypt.hash(password, 10);
         const [result] = await db.execute(
             'INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)',
@@ -53,5 +66,5 @@ exports.login = async (req, res) => {
 
 // Logout function
 exports.logout = (req, res) => {
-    res.redirect('/login.html'); // Or to another page (like homepage)
+    res.redirect('/login.html'); 
 };

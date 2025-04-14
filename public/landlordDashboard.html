@@ -11,9 +11,9 @@
     <header>
         <h1>Welcome, Landlord!</h1>
         <nav>
-            <a href="/manage-properties">Manage Properties</a> |
-            <a href="/view-tenants">View Tenants</a> |
-            <a href="/logout">Logout</a>
+            <a href="/manageProperties.html">Manage Properties </a> |
+            <a href="/view-tenants=">View Maintenance requests</a> |
+            <a href="/logout" id="logoutLink">Logout</a>
         </nav>
     </header>
 
@@ -25,5 +25,17 @@
     <footer>
         <p>&copy; 2025 Property Management System</p>
     </footer>
+    <script>
+        // Add event listener for logout
+        document.getElementById('logoutLink').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Remove JWT token from localStorage (or sessionStorage if you prefer)
+            localStorage.removeItem('token'); // Use sessionStorage if you store the token in sessionStorage
+
+            // Redirect to the login page after logout
+            window.location.href = '/login.html'; // Redirect to login page or wherever you want
+        });
+    </script>
 </body>
 </html>

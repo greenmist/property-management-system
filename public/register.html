@@ -23,7 +23,6 @@
             <select id="role" name="role" required>
                 <option value="tenant">Tenant</option>
                 <option value="landlord">Landlord</option>
-                <option value="admin">Admin</option>
             </select>
 
             <button type="submit">Register</button>
@@ -53,7 +52,7 @@
                     alert("Registration successful!");
                     // Redirect to login page
                 } else {
-                    alert("Error registering user");
+                    alert(data.error);
                 }
             })
             .catch(error => alert("Error registering user"));
