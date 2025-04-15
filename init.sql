@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- INSERT INTO users (name, email, password_hash, role) 
 -- VALUES ('Admin User', 'admin@example.com', 'hashed_password_here', 'admin');
 
-CREATE TABLE Properties (
+CREATE TABLE IF NOT EXISTS Properties (
     id INT PRIMARY KEY AUTO_INCREMENT,
     OwnerID INT NOT NULL,
     Address VARCHAR(255) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE Properties (
     FOREIGN KEY (OwnerID) REFERENCES users(id)
 );
 
-CREATE TABLE Maintenance (
+CREATE TABLE IF NOT EXISTS Maintenance (
     RequestID INT AUTO_INCREMENT PRIMARY KEY,
     TenantID INT NOT NULL,
     PropertyID INT NOT NULL,
@@ -41,7 +41,5 @@ CREATE TABLE Maintenance (
     AssignedTo INT,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ResolvedAt TIMESTAMP NULL,
-    -- FOREIGN KEY (TenantID) REFERENCES Users(TenantID),
-    FOREIGN KEY (PropertyID) REFERENCES Properties(PropertyID),
-    FOREIGN KEY (AssignedTo) REFERENCES Users(UserID)
+    FOREIGN KEY (PropertyID) REFERENCES Properties(id)
 );
