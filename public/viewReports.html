@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Property Reports</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>View Property Reports</h1>
+
+  <!-- Filter and Load -->
+  <label for="statusFilter">Filter by Status:</label>
+  <select id="statusFilter">
+    <option value="All">All</option>
+    <option value="Available">Available</option>
+    <option value="Rented">Rented</option>
+  </select>
+
+  <button id="loadReports">Load Property Reports</button>
+
+  <!-- Summary Stats -->
+  <div id="summary" style="margin-top: 20px;">
+    <p>Total Properties: <span id="totalCount">-</span></p>
+    <p>Available: <span id="availableCount">-</span></p>
+    <p>Rented: <span id="rentedCount">-</span></p>
+    <p>Total Rent Revenue (Rented only): €<span id="totalRent">-</span></p>
+  </div>
+
+  <!-- Report Table (Initially hidden) -->
+  <h2>Property Summary</h2>
+  <table id="reportTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Owner ID</th>
+        <th>Address</th>
+        <th>Type</th>
+        <th>Rent (€)</th>
+        <th>Status</th>
+        <th>Description</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody id="reportBody"></tbody>
+  </table>
+
+  <script>
+    document.getElementById("loadReports").addEventListener("click", function (e) {
+      e.preventDefault();
+      loadReports();
+    });
+  
+    function loadReports() {
+      const token = localStorage.getItem("token");
+      const status = document.getElementById("statusFilter").value;
+  
+      if (!token) {
+        console.error("No token found. Please log in.");
+        window.location.href = "/login.html";
+        return;
+      }
+  
+      fetch(`http://localhost:5000/properties/reports/${status}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to load reports");
+          }
+          return response.json();
+        })
+        .then((properties) => {
+          // Update the summary section
+          updateSummary(properties);
+  
+          // Update the table body
+          const reportBody = document.getElementById("reportBody");
+          reportBody.innerHTML = properties
+            .map((p) =>
+              `<tr data-id="${p.id}">
+                <td>${p.id}</td>
+                <td>${p.OwnerID}</td>
+                <td>${p.Address}</td>
+                <td>${p.Type}</td>
+                <td>${p.RentAmount}</td>
+                <td>${p.Status}</td>
+                <td>${p.Description || ""}</td>
+                <td>${new Date(p.CreatedAt).toLocaleDateString()}</td>
+              </tr>`
+            )
+            .join("");
+  
+          document.getElementById("reportTable").style.display = "table";
+        })
+        .catch((error) => {
+          console.error("Error loading property reports:", error);
+          document.getElementById("reportBody").innerHTML =
+            "<tr><td colspan='9'>Error loading reports.</td></tr>";
+        });
+    }
+  
+    function updateSummary(properties) {
+      const totalCount = properties.length;
+      let availableCount = 0;
+      let rentedCount = 0;
+      let totalRent = 0;
+  
+      properties.forEach((p) => {
+        if (p.Status === "Available") {
+          availableCount++;
+        } else if (p.Status === "Rented") {
+          rentedCount++;
+          totalRent += parseFloat(p.RentAmount || 0);
+        }
+      });
+  
+      document.getElementById("totalCount").innerText = totalCount;
+      document.getElementById("availableCount").innerText = availableCount;
+      document.getElementById("rentedCount").innerText = rentedCount;
+      document.getElementById("totalRent").innerText = totalRent.toFixed(2);
+    }
+  </script>
+</body>
+</html>

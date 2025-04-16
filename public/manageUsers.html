@@ -17,6 +17,12 @@
     <input type="text" id="name" placeholder="Name" required />
     <input type="email" id="email" placeholder="Email" required />
     <input type="password" id="password" placeholder="Password" required />
+
+    <label for="role">Role</label>
+    <select id="role" name="role" required>
+        <option value="tenant">Tenant</option>
+        <option value="landlord">Landlord</option>
+    </select>
     <button type="submit">Add User</button>
   </form>
 
@@ -70,6 +76,7 @@
                 <tr data-id="${user.id}">
                     <td><input type="text" value="${user.name}" /></td>
                     <td><input type="email" value="${user.email}" /></td>
+                    <td>${user.role}</td>
                     <td>
                     <button>Update</button>
                     <button>Delete</button>
@@ -97,6 +104,7 @@
       const name = document.getElementById("name").value;
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
 
       fetch("http://localhost:5000/manage-users/add-user", {
         method: "POST",
@@ -104,10 +112,12 @@
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, role }),
       })
         .then((res) => {
           if (!res.ok) {
+            console.error("Failed to add user:", res.statusText);
+            alert("Failed to add user");
             throw new Error("Failed to add user");
           }
           return res.json();

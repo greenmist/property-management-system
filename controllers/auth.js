@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 
 exports.register = async (req, res) => {
+    console.log("Registering user");
     const { name, email, password, role } = req.body;
 	const errors = {};
 
@@ -27,7 +28,7 @@ exports.register = async (req, res) => {
 
         res.status(201).json({ message: 'User registered successfully' });
     } catch (err) {
-        res.status(500).json({ error: 'Error registering user' });
+        res.status(500).json({ error: err });
     }
 };
 

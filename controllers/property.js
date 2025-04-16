@@ -28,8 +28,6 @@ exports.getProperties = async (req, res) => {
 };
 
 exports.getAllProperties = async (req, res) => {
-    const OwnerID = req.user.id; // Access the user's ID from the token
-    console.log("Creating property", OwnerID);
     try {
         const [results] = await db.query('SELECT * FROM Properties');
         if (results.length === 0) {
@@ -98,4 +96,26 @@ exports.createAdminProperty = (req, res) => {
         if (err) return res.status(500).json(err);
         res.status(201).json({ id: result.insertId, ...req.body });
     });
+};
+
+exports.getFilterProperties = async (req, res) => {
+    const status = req.params.status;
+    let query = 'SELECT * FROM Properties WHERE DeletedAt IS NULL';
+
+    if (status !== 'All') {
+        query += ' AND Status = ?';
+    }
+
+    try {
+        const [results] = await db.query(query, status !== 'All' ? [status] : []);
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No properties found' });
+        }
+
+        res.json(results);
+    } catch (err) {
+        console.error("Error fetching properties:", err);
+        res.status(500).json({ error: "Failed to fetch properties" });
+    }
 };
