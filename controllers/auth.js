@@ -15,7 +15,13 @@ exports.register = async (req, res) => {
         if (!(/^[\-0-9a-zA-Z\.\+_]+@[\-0-9a-zA-Z\.\+_]+\.[a-zA-Z]{2,}$/).test(String(email))) {
             errors.email = ['Email is not valid.'];
         }
-
+        
+        // Password validation
+        // Minimum 8 characters, at least one uppercase letter, one lowercase letter, one number and one special character
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            errors.password = ['Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'];
+        }
         if (Object.keys(errors).length) {
             res.status(400).json({ error: 'errors' });
         }

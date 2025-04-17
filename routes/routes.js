@@ -39,6 +39,3 @@ router.get('/maintenance/view-all-requests', verifyToken, getAllMaintenanceReque
 router.get('/properties/reports/:status', verifyToken, getFilterProperties);
 
 module.exports = router;
-
-
-module.exports = router;
